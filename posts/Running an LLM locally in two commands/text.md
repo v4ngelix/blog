@@ -1,4 +1,5 @@
 ---
+title: Running an LLM locally in two commands
 started: 18.09.2026
 finished: 18.09.2026
 ---

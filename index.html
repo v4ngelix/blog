@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blog</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header>
+      <a href="./" class="home">Blog</a>
+    </header>
+
+    <main></main>
+
+    <template id="post-list">
+      <ol class="post-list"></ol>
+    </template>
+
+    <template id="post-list-item">
+      <li>
+        <time></time>
+        <h2><a></a></h2>
+        <p class="excerpt"></p>
+      </li>
+    </template>
+
+    <template id="post">
+      <article>
+        <h1></h1>
+        <dl class="meta"></dl>
+        <div class="content"></div>
+        <a href="./" class="back">&larr; All posts</a>
+      </article>
+    </template>
+
+    <template id="not-found">
+      <article>
+        <h1>Post not found</h1>
+        <a href="./" class="back">&larr; All posts</a>
+      </article>
+    </template>
+
+    <script src="index.js" defer></script>
+  </body>
+</html>

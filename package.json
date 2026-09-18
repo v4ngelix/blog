@@ -1,0 +1,15 @@
+{
+  "name": "blog",
+  "version": "1.0.0",
+  "description": "A simple monochrome blog",
+  "private": true,
+  "type": "module",
+  "author": "Andi Angel",
+  "license": "ISC",
+  "scripts": {
+    "build": "node scripts/build-posts.js"
+  },
+  "devDependencies": {
+    "marked": "^18.0.13"
+  }
+}
