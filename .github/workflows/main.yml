@@ -1,0 +1,38 @@
+name: Deploy to Website
+
+on:
+  push:
+      branches:
+        - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Build and test
+        run: |
+          npm ci
+          npm test
+          npm run build
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H boheemia.ee >> ~/.ssh/known_hosts
+
+      - name: Upload site
+        run: |
+          rsync -az --delete --mkpath \
+            index.html index.js styles.css posts.json posts \
+            virt65914@boheemia.ee:domeenid/www.boheemia.ee/blog/
