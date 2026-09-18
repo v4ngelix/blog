@@ -1,4 +1,4 @@
-const SITE_TITLE = "Blog";
+const SITE_TITLE = "Andi Angel's Blog";
 
 function cloneTemplate(id) {
   return document.getElementById(id).content.cloneNode(true);
