@@ -2,6 +2,7 @@
 title: Running an LLM locally in two commands
 started: 18.09.2026
 finished: 18.09.2026
+tags: TIL
 ---
 I've been lurking in r/LocalLLaMA for a long time. The idea of running a "ChatGPT" locally has intrigued me ever since I first heard about it. Today I finally tried it, and it was easier than I expected.  
   
