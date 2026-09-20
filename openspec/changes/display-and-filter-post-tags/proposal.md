@@ -36,7 +36,8 @@ glance and to narrow the list to a single topic.
 - `scripts/build-posts.js` - front-matter parsing gains a list-valued key
   allowlist; `posts.json` output shape changes so
   that `meta.tags` is an array of strings.
-- `posts.json` - regenerated; the existing post's `meta.tags` becomes `["TIL"]`.
+- `posts.json` - regenerated at build time (gitignored); the existing post's
+  `meta.tags` becomes `["TIL"]`.
 - `index.html` - the `post-list-item` template gains a tag list; a new template
   for an individual tag link.
 - `index.js` - `render()` reads `?tag`, filters the post list, and renders tag

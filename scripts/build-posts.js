@@ -8,6 +8,12 @@ const POSTS_DIR = path.join(ROOT, "posts");
 const OUTPUT_FILE = path.join(ROOT, "posts.json");
 const POST_FILE = "text.md";
 const EXCERPT_LENGTH = 200;
+const LIST_KEYS = new Set(["tags"]);
+
+function parseValue(key, value) {
+  if (!LIST_KEYS.has(key)) return value;
+  return value.split(",").map((entry) => entry.trim()).filter(Boolean);
+}
 
 function parseFrontMatter(text) {
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
@@ -17,7 +23,8 @@ function parseFrontMatter(text) {
   for (const line of match[1].split(/\r?\n/)) {
     const separator = line.indexOf(":");
     if (separator === -1) continue;
-    meta[line.slice(0, separator).trim()] = line.slice(separator + 1).trim();
+    const key = line.slice(0, separator).trim();
+    meta[key] = parseValue(key, line.slice(separator + 1).trim());
   }
 
   return { meta, body: text.slice(match[0].length) };
