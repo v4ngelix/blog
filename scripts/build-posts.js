@@ -6,6 +6,8 @@ import { Marked } from "marked";
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const POSTS_DIR = path.join(ROOT, "posts");
 const OUTPUT_FILE = path.join(ROOT, "posts.json");
+const DONE_FOLDER = "done";
+const DRAFTS_FOLDER = "drafts";
 const POST_FILE = "text.md";
 const EXCERPT_LENGTH = 200;
 const LIST_KEYS = new Set(["tags"]);
@@ -43,10 +45,6 @@ function parseFrontMatter(text, file) {
 function parseDate(value) {
   const match = value?.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
   return match ? Date.UTC(match[3], match[2] - 1, match[1]) : null;
-}
-
-function isFinished(post) {
-  return parseDate(post.meta.finished) !== null;
 }
 
 function slugify(name) {
@@ -92,17 +90,19 @@ function renderPost(body, mediaUrl) {
   };
 }
 
-function readPost(postsDir, entry) {
+function readPost(folder, entry) {
+  const folderDir = path.join(POSTS_DIR, folder);
   const isDirectory = entry.isDirectory();
-  const file = isDirectory ? path.join(postsDir, entry.name, POST_FILE) : path.join(postsDir, entry.name);
+  const file = isDirectory ? path.join(folderDir, entry.name, POST_FILE) : path.join(folderDir, entry.name);
   if (isDirectory ? !fs.existsSync(file) : path.extname(entry.name) !== ".md") return null;
 
   const name = isDirectory ? entry.name : path.basename(entry.name, ".md");
-  const mediaUrl = encodeURI(isDirectory ? `posts/${entry.name}` : "posts");
+  const mediaUrl = encodeURI(isDirectory ? `posts/${folder}/${entry.name}` : `posts/${folder}`);
   const { meta, body } = parseFrontMatter(fs.readFileSync(file, "utf8"), path.relative(ROOT, file));
   const { title, ...rest } = meta;
 
   return {
+    folder,
     slug: slugify(name),
     title: title || name,
     meta: rest,
@@ -110,16 +110,26 @@ function readPost(postsDir, entry) {
   };
 }
 
-function buildPosts() {
+function readFolder(folder) {
+  const folderDir = path.join(POSTS_DIR, folder);
+  if (!fs.existsSync(folderDir)) return [];
+
   return fs
-    .readdirSync(POSTS_DIR, { withFileTypes: true })
-    .map((entry) => readPost(POSTS_DIR, entry))
-    .filter(Boolean)
-    .sort((a, b) => (parseDate(b.meta.started) ?? -Infinity) - (parseDate(a.meta.started) ?? -Infinity));
+    .readdirSync(folderDir, { withFileTypes: true })
+    .map((entry) => readPost(folder, entry))
+    .filter(Boolean);
+}
+
+function buildPosts() {
+  return [...readFolder(DONE_FOLDER), ...readFolder(DRAFTS_FOLDER)].sort(
+    (a, b) => (parseDate(b.meta.started) ?? -Infinity) - (parseDate(a.meta.started) ?? -Infinity),
+  );
 }
 
 const allPosts = buildPosts();
-const posts = INCLUDE_DRAFTS ? allPosts : allPosts.filter(isFinished);
+const posts = (INCLUDE_DRAFTS ? allPosts : allPosts.filter((post) => post.folder === DONE_FOLDER)).map(
+  ({ folder, ...post }) => post,
+);
 const skipped = allPosts.length - posts.length;
 fs.writeFileSync(OUTPUT_FILE, JSON.stringify(posts, null, 2) + "\n");
 console.log(`Wrote ${posts.length} posts to ${OUTPUT_FILE}${skipped ? ` (${skipped} drafts skipped)` : ""}`);

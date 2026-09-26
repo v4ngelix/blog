@@ -32,6 +32,6 @@ jobs:
 
       - name: Upload site
         run: |
-          rsync -az --delete --mkpath \
+          rsync -az --delete --mkpath --exclude=/posts/drafts/ --delete-excluded \
             index.html index.js styles.css posts.json posts \
             virt65914@boheemia.ee:domeenid/www.boheemia.ee/blog/
