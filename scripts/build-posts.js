@@ -9,6 +9,7 @@ const OUTPUT_FILE = path.join(ROOT, "posts.json");
 const POST_FILE = "text.md";
 const EXCERPT_LENGTH = 200;
 const LIST_KEYS = new Set(["tags"]);
+const INCLUDE_DRAFTS = process.argv.includes("--drafts");
 
 function parseValue(key, value) {
   if (!LIST_KEYS.has(key)) return value;
@@ -33,6 +34,10 @@ function parseFrontMatter(text) {
 function parseDate(value) {
   const match = value?.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
   return match ? Date.UTC(match[3], match[2] - 1, match[1]) : null;
+}
+
+function isFinished(post) {
+  return parseDate(post.meta.finished) !== null;
 }
 
 function slugify(name) {
@@ -104,6 +109,8 @@ function buildPosts() {
     .sort((a, b) => (parseDate(b.meta.started) ?? -Infinity) - (parseDate(a.meta.started) ?? -Infinity));
 }
 
-const posts = buildPosts();
+const allPosts = buildPosts();
+const posts = INCLUDE_DRAFTS ? allPosts : allPosts.filter(isFinished);
+const skipped = allPosts.length - posts.length;
 fs.writeFileSync(OUTPUT_FILE, JSON.stringify(posts, null, 2) + "\n");
-console.log(`Wrote ${posts.length} posts to ${OUTPUT_FILE}`);
+console.log(`Wrote ${posts.length} posts to ${OUTPUT_FILE}${skipped ? ` (${skipped} drafts skipped)` : ""}`);
