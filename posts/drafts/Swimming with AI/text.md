@@ -5,6 +5,8 @@ finished: 26.09.2026
 tags: [Fishing]
 ---
 
+![The San Juan Mountains are beautiful](app.png "San Juan Mountains")
+
 I love swimming, and snorkeling specifically.
 That's an important reason for me to leave my home country every winter.
 One amazing place where swimming is particularly fulfilling is Sardinia in Italy.
