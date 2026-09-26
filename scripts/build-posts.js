@@ -11,12 +11,21 @@ const EXCERPT_LENGTH = 200;
 const LIST_KEYS = new Set(["tags"]);
 const INCLUDE_DRAFTS = process.argv.includes("--drafts");
 
-function parseValue(key, value) {
-  if (!LIST_KEYS.has(key)) return value;
-  return value.split(",").map((entry) => entry.trim()).filter(Boolean);
+function parseList(key, value, file) {
+  if (!value) return [];
+  const match = value.match(/^\[(.*)\]$/);
+  if (!match) throw new Error(`${file}: "${key}" must be an array, e.g. "${key}: [TIL, AI]" (got "${value}")`);
+  return match[1]
+    .split(",")
+    .map((entry) => entry.trim().replace(/^(["'])(.*)\1$/, "$2"))
+    .filter(Boolean);
 }
 
-function parseFrontMatter(text) {
+function parseValue(key, value, file) {
+  return LIST_KEYS.has(key) ? parseList(key, value, file) : value;
+}
+
+function parseFrontMatter(text, file) {
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match) return { meta: {}, body: text };
 
@@ -25,7 +34,7 @@ function parseFrontMatter(text) {
     const separator = line.indexOf(":");
     if (separator === -1) continue;
     const key = line.slice(0, separator).trim();
-    meta[key] = parseValue(key, line.slice(separator + 1).trim());
+    meta[key] = parseValue(key, line.slice(separator + 1).trim(), file);
   }
 
   return { meta, body: text.slice(match[0].length) };
@@ -90,7 +99,7 @@ function readPost(postsDir, entry) {
 
   const name = isDirectory ? entry.name : path.basename(entry.name, ".md");
   const mediaUrl = encodeURI(isDirectory ? `posts/${entry.name}` : "posts");
-  const { meta, body } = parseFrontMatter(fs.readFileSync(file, "utf8"));
+  const { meta, body } = parseFrontMatter(fs.readFileSync(file, "utf8"), path.relative(ROOT, file));
   const { title, ...rest } = meta;
 
   return {
