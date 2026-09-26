@@ -11,5 +11,5 @@
 
 ## 3. Manual verification
 
-- [ ] 3.1 Run `npm run build` and `npm run build:dev`. Both must succeed. Open the site and check that the tags show without brackets, that filtering by `TIL` lists the tagged posts, and that the post page shows tags as `TIL`.
+- [x] 3.1 Run `npm run build` and `npm run build:dev`. Both must succeed. Open the site and check that the tags show without brackets, that filtering by `TIL` lists the tagged posts, and that the post page shows tags as `TIL`.
 - [x] 3.2 Temporarily set a tag to `["Home Lab"]` and to `[]`, rebuild, and check that the result is `Home Lab` for the first and no tag row for the second. Then revert.
