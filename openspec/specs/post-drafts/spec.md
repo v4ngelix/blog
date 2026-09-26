@@ -3,44 +3,51 @@
 ## Purpose
 
 Lets the author keep unfinished posts in the repository without publishing
-them, by treating only posts with a finished date as published, while still
-allowing drafts to be previewed locally.
+them, by treating only posts in `posts/done/` as published and posts in
+`posts/drafts/` as drafts, while still allowing drafts to be previewed locally.
 
 ## Requirements
 
-### Requirement: A post is finished only when it has a valid finished date
+### Requirement: A post's folder decides whether it is published
 
-A post SHALL count as finished only when its front matter contains a
-`finished` value that is a date written as day, month and four-digit year
-separated by dots (for example `18.09.2026`). A post whose `finished` key is
-missing, empty or holds any other value SHALL count as a draft.
+A post SHALL count as published when it lives in `posts/done/` and as a draft
+when it lives in `posts/drafts/`. The `finished` front matter value SHALL NOT
+affect whether a post is published. Anything placed directly in `posts/`,
+outside these two folders, SHALL be ignored by the build.
 
-#### Scenario: A post with a finished date
+#### Scenario: A post in the done folder
 
-- **WHEN** a post's front matter contains `finished: 18.09.2026`
-- **THEN** the post counts as finished
+- **WHEN** a post lives in `posts/done/`
+- **THEN** the post counts as published
 
-#### Scenario: A post with no finished key
+#### Scenario: A post in the drafts folder
 
-- **WHEN** a post's front matter has no `finished` key
+- **WHEN** a post lives in `posts/drafts/`
 - **THEN** the post counts as a draft
 
-#### Scenario: A post with an empty finished value
+#### Scenario: A published post without a finished date
 
-- **WHEN** a post's front matter contains `finished:` with no value
+- **WHEN** a post lives in `posts/done/` and its front matter has no
+  `finished` value
+- **THEN** the post counts as published
+
+#### Scenario: A draft with a finished date
+
+- **WHEN** a post lives in `posts/drafts/` and its front matter contains
+  `finished: 18.09.2026`
 - **THEN** the post counts as a draft
 
-#### Scenario: A post with a malformed finished value
+#### Scenario: A post outside both folders
 
-- **WHEN** a post's front matter contains `finished: soon`
-- **THEN** the post counts as a draft
+- **WHEN** a post lives directly in `posts/`
+- **THEN** the build leaves it out, with or without `--drafts`
 
 ### Requirement: Drafts are excluded from the built site
 
 The default build SHALL leave drafts out of the built post data, so that a
 draft does not appear in the post list, cannot be opened as a post page, and
-contributes no tags to the tag filter. Finished posts SHALL be built exactly as
-before.
+contributes no tags to the tag filter. Published posts SHALL be built exactly
+as before.
 
 #### Scenario: A draft is not listed
 
@@ -59,16 +66,33 @@ before.
   drafts
 - **THEN** that tag appears nowhere on the page
 
+### Requirement: Draft files are not uploaded to the live site
+
+The deploy workflow SHALL NOT upload `posts/drafts/`, so a draft's text and
+media cannot be reached on the live site by direct URL. Media of published
+posts SHALL stay reachable.
+
+#### Scenario: Opening a draft file by URL
+
+- **WHEN** a reader requests a draft's `text.md` or image by its direct URL on
+  the live site
+- **THEN** the file is not served
+
+#### Scenario: Images in a published post
+
+- **WHEN** a published post references an image stored next to its `text.md`
+- **THEN** the image is shown on the live post page
+
 ### Requirement: Drafts can be included for local preview
 
 The build SHALL accept a `--drafts` option that includes drafts in the built
-post data alongside finished posts, so the author can preview them locally.
+post data alongside published posts, so the author can preview them locally.
 The deployed site SHALL be built without this option.
 
 #### Scenario: Building with drafts
 
 - **WHEN** the site is built with `npm run build -- --drafts`
-- **THEN** drafts are listed and can be opened like finished posts
+- **THEN** drafts are listed and can be opened like published posts
 
 #### Scenario: Deploying
 
@@ -77,8 +101,8 @@ The deployed site SHALL be built without this option.
 
 ### Requirement: The build reports skipped drafts
 
-The build SHALL report how many drafts it left out, so a post hidden by a
-missing or mistyped `finished` date is noticed.
+The build SHALL report how many drafts it left out, so a post still sitting in
+`posts/drafts/` is noticed.
 
 #### Scenario: Drafts present
 
